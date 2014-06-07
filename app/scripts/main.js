@@ -1,7 +1,7 @@
 console.log("This is the game!!!");
 
 // Initialize Phaser, and creates a 400x490px game
-var game = new Phaser.Game(400, 490, Phaser.AUTO, 'game_div');
+var game = new Phaser.Game(590, 490, Phaser.AUTO, 'game_div');
 
 // Creates a new 'main' state that will contain the game
 var main_state = {
@@ -10,8 +10,8 @@ var main_state = {
     this.game.stage.backgroundColor = '#71c5cf';
 
     this.game.load.spritesheet('dog', '/images/dog.png', 50, 42);
+    this.game.load.spritesheet('player', '/images/player.png', 40, 50);
     this.game.load.image('poop', '/images/poop.png');
-    this.game.load.image('player', '/images/player.png');
   },
 
   create: function() {
@@ -25,10 +25,8 @@ var main_state = {
       this.game.physics.enable( [ poop ], Phaser.Physics.ARCADE);
     });
 
-
-
     this.dog = this.game.add.sprite(100, 245, 'dog');
-    this.dog.scale.set(2);
+    this.dog.scale.set(1.5);
     this.dog.animations.add('walk', [0, 1], 10, true);
     this.dog.animations.add('pooping', [2, 3], 10, true);
     this.dog.animations.play('walk');
@@ -37,6 +35,8 @@ var main_state = {
     this.dog.state = "walking";
 
     this.player = this.game.add.sprite(100, 245, 'player');
+    this.player.animations.add('walk', [0, 1], 10, true);
+    this.player.animations.play('walk');
     this.game.physics.enable( [ this.player ], Phaser.Physics.ARCADE);
     this.player.body.collideWorldBounds = true;
     this.player.state = "walking";
