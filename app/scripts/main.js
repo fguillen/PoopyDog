@@ -9,7 +9,7 @@ var main_state = {
   preload: function() {
     this.game.stage.backgroundColor = '#71c5cf';
 
-    this.game.load.image('dog', '/images/dog.png');
+    this.game.load.spritesheet('dog', '/images/dog.png', 50, 42);
     this.game.load.image('poop', '/images/poop.png');
     this.game.load.image('player', '/images/player.png');
   },
@@ -18,7 +18,18 @@ var main_state = {
     // Looks like I don't need this bellow line
     // this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
+    this.poops = game.add.group();
+    this.poops.createMultiple(20, 'poop');
+
+    this.poops.forEach( function(poop){
+      this.game.physics.enable( [ poop ], Phaser.Physics.ARCADE);
+    });
+
     this.dog = this.game.add.sprite(100, 245, 'dog');
+    this.dog.scale.set(2);
+    this.dog.animations.add('walk', [0, 1], 10, true);
+    this.dog.animations.add('pooping', [2, 3], 10, true);
+    this.dog.animations.play('walk');
     this.game.physics.enable( [ this.dog ], Phaser.Physics.ARCADE);
     this.dog.body.collideWorldBounds = true;
 
@@ -29,12 +40,7 @@ var main_state = {
 
     this.dog_change_direction();
 
-    this.poops = game.add.group();
-    this.poops.createMultiple(20, 'poop');
 
-    this.poops.forEach( function(poop){
-      this.game.physics.enable( [ poop ], Phaser.Physics.ARCADE);
-    });
 
     this.space_key = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     this.space_key.onDown.add(this.player_wants_to_pick_up_poop, this);
@@ -47,6 +53,15 @@ var main_state = {
     this.label_score = this.game.add.text(20, 20, "0", style);
 
     this.cursors = game.input.keyboard.createCursorKeys();
+
+    // Animations
+    // this.anim_pooping = this.dog.animations.add('pooping');
+
+    // this.anim_pooping.onStart.add(animationStarted, this);
+    // this.anim_pooping.onLoop.add(animationLooped, this);
+    // this.anim_pooping.onComplete.add(animationStopped, this);
+
+    // anim.play(10, true);
   },
 
   update: function() {
@@ -89,16 +104,13 @@ var main_state = {
   player_wants_to_pick_up_poop: function(){
     console.log("player_wants_to_pick_up_poop");
 
-    // this.poops.forEach( function(poop){
-      this.game.physics.arcade.overlap(
-        this.player,
-        this.poops,
-        this.player_picks_up_poop,
-        null,
-        this
-      );
-    // });
-
+    this.game.physics.arcade.overlap(
+      this.player,
+      this.poops,
+      this.player_picks_up_poop,
+      null,
+      this
+    );
 
   },
 
@@ -139,47 +151,6 @@ var main_state = {
     poop.reset(this.dog.x, this.dog.y);
   },
 
-  // Make the dog jump
-  jump: function() {
-    // Add a vertical velocity to the dog
-    this.dog.body.velocity.y = -350;
-  },
-
-  // Restart the game
-  restart_game: function() {
-    this.game.time.events.remove(this.timer);
-
-    // Start the 'main' state, which restarts the game
-    this.game.state.start('main');
-  },
-
-  add_one_poop: function(x, y) {
-    console.log(this.poops.countDead());
-    // Get the first dead poop of our group
-    var poop = this.poops.getFirstDead();
-
-    // Set the new position of the poop
-    poop.reset(x, y);
-
-    // Add velocity to the poop to make it move left
-    poop.body.velocity.x = -200;
-
-    // Kill the poop when it's no longer visible
-    poop.outOfBoundsKill = true;
-  },
-
-  add_row_of_poops: function() {
-    var hole = Math.floor(Math.random()*4)+1;
-
-    for (var i = 0; i < 8; i++) {
-      if (i != hole && i != hole +1 && i != hole +2) {
-        this.add_one_poop(400, i*60+10);
-      }
-    }
-
-    this.score += 1;
-    this.label_score.setText(this.score);
-  },
 };
 
 // Add and start the 'main' state to start the game
