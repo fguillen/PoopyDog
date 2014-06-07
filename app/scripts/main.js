@@ -25,6 +25,8 @@ var main_state = {
       this.game.physics.enable( [ poop ], Phaser.Physics.ARCADE);
     });
 
+
+
     this.dog = this.game.add.sprite(100, 245, 'dog');
     this.dog.scale.set(2);
     this.dog.animations.add('walk', [0, 1], 10, true);
@@ -32,10 +34,12 @@ var main_state = {
     this.dog.animations.play('walk');
     this.game.physics.enable( [ this.dog ], Phaser.Physics.ARCADE);
     this.dog.body.collideWorldBounds = true;
+    this.dog.state = "walking";
 
     this.player = this.game.add.sprite(100, 245, 'player');
     this.game.physics.enable( [ this.player ], Phaser.Physics.ARCADE);
     this.player.body.collideWorldBounds = true;
+    this.player.state = "walking";
 
 
     this.dog_change_direction();
@@ -70,11 +74,8 @@ var main_state = {
     //   this.restart_game();
     // }
 
-    if(!this.dog.inWorld) {
-      this.dog_change_direction();
-    }
 
-    if(this.game.rnd.integerInRange(0, 40) == 1) {
+    if(this.dog.state == "walking" && this.game.rnd.integerInRange(0, 40) == 1) {
       this.dog_change_direction();
     }
 
@@ -134,21 +135,42 @@ var main_state = {
   },
 
   does_the_dog_want_to_poop: function(){
+    if(this.dog.state == "pooping") return;
+
     var number = this.game.rnd.integerInRange(0, 1);
     console.log("number", number);
 
     if(number == 1){
-      console.log("dog wants to poop");
-      this.dog_poops();
+      this.dog_start_pooping();
     }
   },
 
+  dog_start_pooping: function(){
+    console.log("dog_start_pooping");
+    this.dog.state = "pooping"
+
+    this.dog.body.velocity.y = 0;
+    this.dog.body.velocity.x = 0;
+
+    this.dog.animations.play('pooping');
+    game.time.events.add(3000, this.dog_poops, this);
+  },
+
+  dog_walks: function(){
+    console.log("dog_walks");
+    this.dog.state = "walking"
+    this.dog.animations.play('walk');
+    this.dog_change_direction();
+  },
+
   dog_poops: function(){
-    console.log("dog poops");
+    console.log("dog_poops");
     var poop = this.poops.getFirstDead();
 
     // Set the new position of the poop
-    poop.reset(this.dog.x, this.dog.y);
+    poop.reset(this.dog.x + 70, this.dog.y + 20);
+
+    this.dog_walks();
   },
 
 };
